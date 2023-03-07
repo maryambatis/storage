@@ -3,4 +3,4 @@
 docker-compose up
 
 #Postman collection and samples 
-`` /Storage.postman_collection.json
+ /Storage.postman_collection.json
