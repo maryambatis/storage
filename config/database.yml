@@ -1,0 +1,22 @@
+default: &default
+  adapter: postgresql
+  pool: 5
+  # pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  port: <%= Rails.application.secrets.dig(:db, :port) %>
+  host: <%= Rails.application.secrets.dig(:db, :host) %>
+  username: <%= Rails.application.secrets.dig(:db, :username) %>
+  password: <%= Rails.application.secrets.dig(:db, :password) %>
+
+development:
+  <<: *default
+  database: storage_dev
+
+
+test:
+  <<: *default
+  database: storage_test
+
+production:
+  <<: *default
+  database: <%= Rails.application.secrets.dig(:db, :name) %> 

@@ -1,0 +1,58 @@
+version: '2'
+services:
+  redis:
+    image: "redis:latest"
+  sftp:
+    image: "atmoz/sftp:latest"
+    command: foo:pass:::upload
+  postgres:
+    image: "postgres:12.14-alpine3.17"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: storage_local
+    healthcheck:
+      test: ["psql", "-w","-U", "$POSTGRES_USER", "-d","POSTGRES_DB","-c", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 2
+  backend:
+    environment:
+      RAILS_ENV: production
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    # command: ["bundle exec rails db:seed --environment production"]
+    command: ["bash", "-c", "bundle exec rails db:migrate && bundle exec rails db:seed && bundle exec rails s"]
+    volumes:
+      - .:/app:rw
+    ports:
+      - "3000:3000"
+    env_file:
+    - ".env"   
+    depends_on:
+      - postgres
+      - sftp
+      - redis
+    links:
+      - postgres
+      - sftp
+      - redis
+  sidekiq:
+    environment:
+      RAILS_ENV: production
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    # command: ["bundle exec rails db:seed --environment production"]
+    command: bundle exec sidekiq -C config/sidekiq.yml 
+    volumes:
+      - .:/app:rw
+    env_file:
+    - ".env"   
+    depends_on:
+      - backend
+    links:
+      - postgres
+      - sftp
+      - redis

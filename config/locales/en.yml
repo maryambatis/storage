@@ -1,0 +1,7 @@
+en:
+    api:
+      v1:
+        clients:
+          errors: 
+            token_expired: "Token got expired!"
+            unauthorized: "Unauthorized client!"
